@@ -1,0 +1,16 @@
+{
+  "studioName": "[Studio Name]",
+  "headline": "Spaces shaped by *light* and place.",
+  "intro": "[A short paragraph introducing the architect — approach, materials, and the kind of clients they work with.]",
+  "quote": "[A sentence in the architect's own words about what makes a good building.]",
+  "studioText": "[A few paragraphs about the practice: training, how the studio works with clients, and the places it builds in.]",
+  "city": "[City]",
+  "established": "[Year]",
+  "phone": "+91 00000 00000",
+  "whatsapp": "910000000000",
+  "email": "hello@example.com",
+  "address": "[Studio address line 1]\n[City, PIN]",
+  "mapUrl": "https://maps.google.com",
+  "instagram": "https://instagram.com",
+  "linkedin": ""
+}

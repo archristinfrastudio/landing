@@ -1,0 +1,122 @@
+# Pages CMS configuration — this is what the architect sees at app.pagescms.org.
+# Docs: https://pagescms.org/docs/
+
+media:
+  - name: photos
+    label: Project photos
+    input: src/assets/projects
+    output: /projects
+    rename: safe
+    extensions: [jpg, jpeg, png, webp]
+
+content:
+  - name: projects
+    label: Projects
+    type: collection
+    path: src/content/projects
+    format: yaml-frontmatter
+    filename: '{primary}.md'
+    view:
+      fields: [title, type, year, published]
+    fields:
+      - name: title
+        label: Project name
+        type: string
+        required: true
+      - name: location
+        label: Location
+        type: string
+      - name: year
+        label: Year completed
+        type: number
+        required: true
+      - name: type
+        label: Type
+        type: select
+        required: true
+        options:
+          values: [Residential, Commercial, Interiors, Hospitality, Institutional, Landscape]
+      - name: summary
+        label: Short description (shown on the homepage)
+        type: text
+      - name: cover
+        label: Cover photo
+        type: image
+        required: true
+        options:
+          media: photos
+      - name: gallery
+        label: Gallery photos
+        type: image
+        options:
+          media: photos
+          multiple:
+            max: 30
+          unique: true
+      - name: featured
+        label: Show on homepage
+        type: boolean
+        default: false
+      - name: published
+        label: Published (switch off to hide)
+        type: boolean
+        default: true
+      - name: order
+        label: Sort order (smaller numbers appear first)
+        type: number
+        default: 100
+      - name: body
+        label: Full description
+        type: rich-text
+
+  - name: settings
+    label: Studio & contact details
+    type: file
+    path: src/content/settings.json
+    format: json
+    fields:
+      - name: studioName
+        label: Studio name
+        type: string
+        required: true
+      - name: headline
+        label: Homepage headline (put *stars* around a word to italicise it)
+        type: string
+        required: true
+      - name: intro
+        label: Short introduction
+        type: text
+        required: true
+      - name: quote
+        label: Quote
+        type: text
+      - name: studioText
+        label: Studio page text (leave a blank line between paragraphs)
+        type: text
+      - name: city
+        label: City
+        type: string
+      - name: established
+        label: Year established
+        type: string
+      - name: phone
+        label: Phone number (as it should appear)
+        type: string
+      - name: whatsapp
+        label: WhatsApp number (digits with country code, e.g. 919876543210)
+        type: string
+      - name: email
+        label: Email
+        type: string
+      - name: address
+        label: Studio address
+        type: text
+      - name: mapUrl
+        label: Google Maps link
+        type: string
+      - name: instagram
+        label: Instagram link
+        type: string
+      - name: linkedin
+        label: LinkedIn link
+        type: string

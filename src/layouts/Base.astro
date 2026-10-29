@@ -1,0 +1,53 @@
+---
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/500-italic.css';
+import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { getSettings, url } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  current?: 'home' | 'works' | 'studio';
+}
+
+const { title, description, image, current = 'home' } = Astro.props;
+const settings = await getSettings();
+const pageTitle = title ? `${title} · ${settings.studioName}` : `${settings.studioName} · Architect${settings.city ? `, ${settings.city}` : ''}`;
+const pageDescription = description || settings.intro;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image ? new URL(image, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+    <meta name="theme-color" content="#e9e7e3" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header studioName={settings.studioName} current={current} />
+    <main id="main">
+      <slot />
+    </main>
+    <ContactBand settings={settings} />
+  </body>
+</html>

@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { getProjects, photo, url } from '../../lib/site';
+
+const projects = await getProjects();
+const types = [...new Set(projects.map((p) => p.data.type))].sort();
+---
+
+<Base title="Works" current="works" description="Selected architecture and interior projects.">
+  <section class="wrap intro">
+    <h1 class="serif">Works</h1>
+    {types.length > 1 && (
+      <div class="filters" role="group" aria-label="Filter projects by type" data-filters hidden>
+        <button type="button" aria-pressed="true" data-type="all">All</button>
+        {types.map((t) => <button type="button" aria-pressed="false" data-type={t}>{t}</button>)}
+      </div>
+    )}
+  </section>
+
+  <section class="wrap" aria-label="Projects">
+    <ul class="grid">
+      {projects.map((p, i) => {
+        const img = photo(p.data.cover);
+        return (
+          <li data-type={p.data.type}>
+            <a href={url(`/works/${p.id}/`)} class="card">
+              <span class="photo-frame frame">
+                {img && (
+                  <Image
+                    src={img}
+                    alt=""
+                    widths={[400, 700, 1000]}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                    loading={i < 3 ? 'eager' : 'lazy'}
+                  />
+                )}
+              </span>
+              <span class="title serif">{p.data.title}</span>
+              <span class="label">{[p.data.type, p.data.location, p.data.year].filter(Boolean).join(' · ')}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+    <p class="empty" data-empty hidden>No projects of this type yet.</p>
+  </section>
+</Base>
+
+<script>
+  const group = document.querySelector<HTMLElement>('[data-filters]');
+  if (group) {
+    group.hidden = false;
+    const buttons = [...group.querySelectorAll<HTMLButtonElement>('button')];
+    const items = [...document.querySelectorAll<HTMLElement>('.grid > li')];
+    const empty = document.querySelector<HTMLElement>('[data-empty]');
+    const apply = (type: string) => {
+      let shown = 0;
+      for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.type === type));
+      for (const li of items) {
+        const match = type === 'all' || li.dataset.type === type;
+        li.hidden = !match;
+        if (match) shown++;
+      }
+      if (empty) empty.hidden = shown > 0;
+    };
+    for (const b of buttons) b.addEventListener('click', () => apply(b.dataset.type || 'all'));
+  }
+</script>
+
+<style>
+  .intro {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    padding-block: clamp(40px, 7vw, 72px) 40px;
+  }
+  h1 { margin: 0; font-size: clamp(56px, 8vw, 96px); line-height: 1; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filters button {
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    font: 500 14px var(--sans);
+    cursor: pointer;
+  }
+  .filters button[aria-pressed='true'] { background: var(--ink); color: var(--ground); }
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 var(--section);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 56px 32px;
+  }
+  .grid > li[hidden] { display: none; }
+  .card { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: var(--ink); }
+  .frame { display: block; aspect-ratio: 4 / 5; margin-bottom: 8px; }
+  .frame img { transition: transform 0.8s ease; }
+  .card:hover .frame img { transform: scale(1.03); }
+  @media (prefers-reduced-motion: reduce) { .frame img { transition: none; } .card:hover .frame img { transform: none; } }
+  .title { font-size: 30px; line-height: 1.1; }
+  .card:hover .title { text-decoration: underline; text-decoration-thickness: 1px; }
+  .empty { padding-bottom: var(--section); color: var(--ink-muted); }
+</style>

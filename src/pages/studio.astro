@@ -1,0 +1,83 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { getProjects, getSettings, photo } from '../lib/site';
+
+const settings = await getSettings();
+const projects = await getProjects();
+const paragraphs = settings.studioText.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+const feature = projects.find((p) => p.data.featured) ?? projects[0];
+const img = feature ? photo(feature.data.gallery[0] ?? feature.data.cover) : null;
+const facts = [
+  settings.city && { k: 'Based in', v: settings.city },
+  settings.established && { k: 'Established', v: settings.established },
+  projects.length > 0 && { k: 'Projects', v: String(projects.length) },
+].filter(Boolean) as { k: string; v: string }[];
+---
+
+<Base title="Studio" current="studio" description={settings.intro}>
+  <section class="wrap top">
+    <h1 class="serif">Studio</h1>
+    <p class="lead serif">{settings.intro}</p>
+  </section>
+
+  <section class="wrap split">
+    {img && (
+      <div class="photo photo-frame">
+        <Image src={img} alt="" widths={[480, 800, 1200]} sizes="(max-width: 900px) 100vw, 45vw" loading="lazy" />
+      </div>
+    )}
+    <div class="text">
+      {paragraphs.map((p) => <p>{p}</p>)}
+      {facts.length > 0 && (
+        <dl class="facts">
+          {facts.map((f) => (
+            <div>
+              <dt class="label">{f.k}</dt>
+              <dd class="serif">{f.v}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
+  </section>
+
+  {settings.quote && (
+    <section class="wrap quote">
+      <blockquote class="serif">“{settings.quote}”</blockquote>
+    </section>
+  )}
+</Base>
+
+<style>
+  .top {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-block: clamp(40px, 7vw, 72px) clamp(40px, 6vw, 64px);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  h1 { margin: 0; font-size: clamp(56px, 8vw, 96px); line-height: 1; }
+  .lead { margin: 0; max-width: 900px; font-size: clamp(26px, 3.2vw, 38px); line-height: 1.25; }
+  .split {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(32px, 6vw, 80px);
+    align-items: flex-start;
+    padding-block: clamp(48px, 7vw, 88px);
+  }
+  .photo { flex: 1 1 420px; aspect-ratio: 4 / 5; }
+  .text { flex: 1 1 360px; max-width: 600px; color: var(--ink-soft); font-size: 17px; line-height: 1.7; }
+  .text p { margin: 0 0 1em; }
+  .facts {
+    margin: 40px 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 24px;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+  }
+  .facts dd { margin: 4px 0 0; font-size: 30px; color: var(--ink); }
+  .quote { padding-block: 0 var(--section); }
+  blockquote { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: 1.2; font-style: italic; max-width: 980px; }
+</style>

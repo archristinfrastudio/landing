@@ -1,0 +1,131 @@
+---
+import { Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import ProjectSpread from '../components/ProjectSpread.astro';
+import { emphasis, getProjects, getSettings, photo, url } from '../lib/site';
+
+const settings = await getSettings();
+const projects = await getProjects();
+const featured = projects.filter((p) => p.data.featured);
+const selected = (featured.length ? featured : projects).slice(0, 6);
+const hero = selected[0];
+const heroImg = hero ? photo(hero.data.cover) : null;
+const og = heroImg ? await getImage({ src: heroImg, width: 1200, format: 'jpg' }) : null;
+
+const heroLabel = ['Architect', settings.city, settings.established && `Est. ${settings.established}`]
+  .filter(Boolean)
+  .join(' · ');
+---
+
+<Base current="home" image={og?.src}>
+  <section class="wrap hero">
+    <div class="hero-text">
+      <span class="label">{heroLabel}</span>
+      <h1 class="serif" set:html={emphasis(settings.headline)} />
+      <p>{settings.intro}</p>
+    </div>
+    {hero && (
+      <a class="hero-photo photo-frame" href={url(`/works/${hero.id}/`)}>
+        {heroImg && (
+          <Image
+            src={heroImg}
+            alt={`${hero.data.title}, ${hero.data.location}`}
+            widths={[480, 800, 1200, 1600]}
+            sizes="(max-width: 900px) 100vw, 55vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        )}
+        <span class="caption">{hero.data.title} · {hero.data.year}</span>
+      </a>
+    )}
+  </section>
+
+  {selected.length > 0 && (
+    <section class="wrap works" aria-labelledby="works-title">
+      <div class="head">
+        <h2 id="works-title" class="serif">Selected works</h2>
+        <a class="link-arrow label-link" href={url('/works/')}>All projects →</a>
+      </div>
+      <div class="list">
+        {selected.map((project, i) => <ProjectSpread project={project} index={i} />)}
+      </div>
+    </section>
+  )}
+
+  {settings.quote && (
+    <section class="wrap quote">
+      <blockquote class="serif">“{settings.quote}”</blockquote>
+      <a class="link-arrow" href={url('/studio/')}>About the studio →</a>
+    </section>
+  )}
+</Base>
+
+<style>
+  .hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: clamp(32px, 5vw, 56px);
+    padding-block: clamp(40px, 7vw, 72px) var(--section);
+  }
+  .hero-text {
+    flex: 1 1 380px;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 3vw, 28px);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(52px, 7.2vw, 96px);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+  }
+  h1 :global(em) { font-style: italic; }
+  .hero-text p { margin: 0; font-size: 17px; line-height: 1.65; max-width: 440px; color: var(--ink-soft); }
+  .hero-photo {
+    flex: 1 1 480px;
+    position: relative;
+    aspect-ratio: 4 / 5;
+    max-height: 780px;
+    display: block;
+  }
+  .caption {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    background: var(--ground);
+    color: var(--ink);
+    padding: 8px 12px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .works { display: flex; flex-direction: column; gap: clamp(56px, 8vw, 96px); padding-bottom: 64px; }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 16px;
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+  }
+  .head h2 { margin: 0; font-size: clamp(40px, 5vw, 56px); }
+  .label-link { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; }
+  .list { display: flex; flex-direction: column; gap: clamp(64px, 9vw, 112px); }
+
+  .quote { padding-block: 64px var(--section); display: flex; flex-direction: column; gap: 20px; }
+  blockquote {
+    margin: 0;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.2;
+    font-style: italic;
+    max-width: 980px;
+  }
+
+  @media (max-width: 900px) {
+    .hero-photo { flex: none; width: 100%; aspect-ratio: 4 / 5; }
+  }
+</style>

@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/site';
+---
+
+<Base title="Page not found">
+  <section class="wrap nf">
+    <h1 class="serif">This page has moved or doesn’t exist.</h1>
+    <a class="link-arrow" href={url('/works/')}>See all works →</a>
+  </section>
+</Base>
+
+<style>
+  .nf { padding-block: var(--section); display: flex; flex-direction: column; gap: 20px; }
+  h1 { margin: 0; font-size: clamp(40px, 6vw, 72px); line-height: 1.05; max-width: 900px; }
+</style>

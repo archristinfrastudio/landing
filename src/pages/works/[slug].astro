@@ -1,0 +1,245 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getProjects, photo, url } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: {
+      project,
+      prev: projects[(i - 1 + projects.length) % projects.length],
+      next: projects[(i + 1) % projects.length],
+    },
+  }));
+}
+
+const { project, prev, next } = Astro.props;
+const { title, location, year, type, summary, cover, gallery } = project.data;
+const { Content } = await render(project);
+
+const coverImg = photo(cover);
+const og = coverImg ? await getImage({ src: coverImg, width: 1200, format: 'jpg' }) : null;
+
+// Each gallery photo gets a responsive thumbnail and a large version for the viewer.
+const photos = await Promise.all(
+  gallery
+    .map((path) => photo(path))
+    .filter((img): img is NonNullable<typeof img> => img !== null)
+    .map(async (img) => ({ img, large: await getImage({ src: img, width: 2000 }) })),
+);
+const meta = [type, location, year].filter(Boolean).join(' · ');
+// Only show previous/next links when there is more than one project.
+const many = prev.id !== project.id;
+---
+
+<Base title={title} description={summary || `${title} — ${meta}`} image={og?.src} current="works">
+  <article>
+    <header class="wrap head">
+      <a class="back link-arrow" href={url('/works/')}>← All works</a>
+      <h1 class="serif">{title}</h1>
+      <span class="label">{meta}</span>
+    </header>
+
+    {coverImg && (
+      <div class="wrap">
+        <div class="cover photo-frame">
+          <Image
+            src={coverImg}
+            alt={`${title}, ${location}`}
+            widths={[600, 1000, 1400, 2000]}
+            sizes="(max-width: 1320px) 100vw, 1320px"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+      </div>
+    )}
+
+    <div class="wrap body">
+      {summary && <p class="summary serif">{summary}</p>}
+      <div class="content"><Content /></div>
+    </div>
+
+    {photos.length > 0 && (
+      <section class="wrap gallery" aria-label="Project photos">
+        {photos.map(({ img, large }, i) => (
+          <a
+            class:list={['shot', 'photo-frame', { tall: img.height > img.width }]}
+            href={large.src}
+            data-index={i}
+            aria-label={`Open photo ${i + 1} of ${photos.length}`}
+          >
+            <Image
+              src={img}
+              alt={`${title} — photo ${i + 1}`}
+              widths={[480, 800, 1200]}
+              sizes="(max-width: 700px) 100vw, 50vw"
+              loading="lazy"
+            />
+          </a>
+        ))}
+      </section>
+    )}
+
+    {many && (
+      <nav class="wrap" aria-label="More projects">
+        <div class="pager">
+        <a href={url(`/works/${prev.id}/`)}>
+          <span class="label">Previous</span>
+          <span class="serif">{prev.data.title}</span>
+        </a>
+        <a class="next-link" href={url(`/works/${next.id}/`)}>
+          <span class="label">Next</span>
+          <span class="serif">{next.data.title}</span>
+        </a>
+        </div>
+      </nav>
+    )}
+  </article>
+
+  <dialog class="viewer" aria-label="Photo viewer">
+    <img alt="" />
+    <button type="button" class="ctl ctl-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.6" fill="none" /></svg>
+    </button>
+    <button type="button" class="ctl ctl-prev" aria-label="Previous photo">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.6" fill="none" /></svg>
+    </button>
+    <button type="button" class="ctl ctl-next" aria-label="Next photo">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.6" fill="none" /></svg>
+    </button>
+    <span class="count" aria-live="polite"></span>
+  </dialog>
+</Base>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.viewer');
+  const shots = [...document.querySelectorAll<HTMLAnchorElement>('.gallery .shot')];
+  if (dialog && shots.length && typeof dialog.showModal === 'function') {
+    const img = dialog.querySelector('img')!;
+    const count = dialog.querySelector<HTMLElement>('.count')!;
+    let current = 0;
+    const show = (i: number) => {
+      current = (i + shots.length) % shots.length;
+      const shot = shots[current];
+      img.src = shot.href;
+      img.alt = shot.querySelector('img')?.alt ?? '';
+      count.textContent = `${current + 1} / ${shots.length}`;
+    };
+    shots.forEach((shot, i) =>
+      shot.addEventListener('click', (e) => {
+        e.preventDefault();
+        show(i);
+        dialog.showModal();
+      }),
+    );
+    dialog.querySelector('.ctl-close')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('.ctl-prev')!.addEventListener('click', () => show(current - 1));
+    dialog.querySelector('.ctl-next')!.addEventListener('click', () => show(current + 1));
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(current - 1);
+      if (e.key === 'ArrowRight') show(current + 1);
+    });
+    let startX = 0;
+    dialog.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+    dialog.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+    });
+  }
+</script>
+
+<style>
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-block: clamp(28px, 5vw, 48px) clamp(28px, 4vw, 40px);
+  }
+  .back { align-self: flex-start; text-decoration: none; font-weight: 500; }
+  h1 { margin: 0; font-size: clamp(48px, 7vw, 88px); line-height: 1; }
+  .cover { aspect-ratio: 16 / 9; }
+  @media (max-width: 700px) { .cover { aspect-ratio: 4 / 3; } }
+
+  .body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px clamp(32px, 6vw, 80px);
+    padding-block: clamp(40px, 6vw, 72px);
+  }
+  .summary {
+    flex: 1 1 320px;
+    margin: 0;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.25;
+    font-style: italic;
+  }
+  .content { flex: 1.4 1 420px; max-width: 640px; color: var(--ink-soft); font-size: 17px; line-height: 1.7; }
+  .content :global(p) { margin: 0 0 1em; }
+  .content :global(p:last-child) { margin-bottom: 0; }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(12px, 2vw, 24px);
+    padding-bottom: clamp(56px, 8vw, 96px);
+  }
+  .shot { display: block; aspect-ratio: 3 / 2; cursor: zoom-in; }
+  .shot.tall { aspect-ratio: 4 / 5; }
+  @media (max-width: 700px) {
+    .gallery { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    border-top: 1px solid var(--rule);
+    padding-block: 28px 0;
+    margin-bottom: var(--section);
+  }
+  .pager a { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--ink); min-height: 44px; }
+  .pager a .serif { font-size: clamp(22px, 3vw, 32px); line-height: 1.1; }
+  .pager a:hover .serif { text-decoration: underline; text-decoration-thickness: 1px; }
+  .pager .next-link { text-align: right; align-items: flex-end; }
+
+  .viewer {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgba(17, 17, 16, 0.96);
+    color: #f1efea;
+  }
+  .viewer::backdrop { background: transparent; }
+  .viewer[open] { display: flex; align-items: center; justify-content: center; }
+  .viewer img { max-width: calc(100vw - 32px); max-height: calc(100dvh - 120px); width: auto; height: auto; object-fit: contain; }
+  .ctl {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    border: 1px solid rgba(241, 239, 234, 0.6);
+    background: transparent;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .ctl:focus-visible { outline-color: #f1efea; }
+  .ctl-close { top: 16px; right: 16px; }
+  .ctl-prev { left: 16px; top: 50%; transform: translateY(-50%); }
+  .ctl-next { right: 16px; top: 50%; transform: translateY(-50%); }
+  .count { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 13px; letter-spacing: 0.1em; }
+  @media (max-width: 700px) {
+    .ctl-prev, .ctl-next { top: auto; bottom: 12px; transform: none; }
+  }
+</style>

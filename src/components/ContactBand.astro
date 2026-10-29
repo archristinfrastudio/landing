@@ -1,0 +1,107 @@
+---
+import { telHref, whatsappHref } from '../lib/site';
+
+interface Props {
+  settings: {
+    studioName: string;
+    phone: string;
+    whatsapp: string;
+    email: string;
+    address: string;
+    mapUrl: string;
+    instagram: string;
+    linkedin: string;
+  };
+}
+const { settings: s } = Astro.props;
+const addressLines = s.address.split('\n').filter(Boolean);
+const year = new Date().getFullYear();
+---
+
+<section id="contact" class="band" aria-labelledby="contact-title">
+  <div class="wrap grid">
+    <h2 id="contact-title" class="serif title">Visit the studio</h2>
+    <div class="details">
+      {addressLines.length > 0 && (
+        <div class="item">
+          <span class="band-label">Address</span>
+          <address>
+            {addressLines.map((line) => <span>{line}</span>)}
+          </address>
+          {s.mapUrl && <a href={s.mapUrl} rel="noopener">View on map →</a>}
+        </div>
+      )}
+      {(s.phone || s.whatsapp) && (
+        <div class="item">
+          <span class="band-label">Call or WhatsApp</span>
+          {s.phone && <a href={telHref(s.phone)}>{s.phone}</a>}
+          {s.whatsapp && <a href={whatsappHref(s.whatsapp)} rel="noopener">Message on WhatsApp</a>}
+        </div>
+      )}
+      {s.email && (
+        <div class="item">
+          <span class="band-label">Write</span>
+          <a href={`mailto:${s.email}`}>{s.email}</a>
+        </div>
+      )}
+      {(s.instagram || s.linkedin) && (
+        <div class="item">
+          <span class="band-label">Follow</span>
+          {s.instagram && <a href={s.instagram} rel="noopener">Instagram</a>}
+          {s.linkedin && <a href={s.linkedin} rel="noopener">LinkedIn</a>}
+        </div>
+      )}
+    </div>
+  </div>
+  <footer class="foot">
+    <div class="wrap">© {year} {s.studioName}</div>
+  </footer>
+</section>
+
+<style>
+  .band { background: var(--band); color: var(--band-ink); }
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 48px 56px;
+    padding-block: var(--section);
+  }
+  .title {
+    flex: 1 1 320px;
+    margin: 0;
+    font-size: clamp(44px, 6vw, 72px);
+    line-height: 1;
+  }
+  .details {
+    flex: 2 1 520px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px 40px;
+    font-size: 17px;
+  }
+  .item { display: flex; flex-direction: column; gap: 2px; }
+  .band-label {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--band-muted);
+    margin-bottom: 4px;
+  }
+  address { font-style: normal; display: flex; flex-direction: column; }
+  .item a {
+    color: var(--band-ink);
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    overflow-wrap: anywhere;
+  }
+  .item a:hover { color: var(--band-muted); }
+  .item a:focus-visible { outline-color: var(--band-ink); }
+  .foot {
+    border-top: 1px solid var(--band-rule);
+    color: var(--band-muted);
+    font-size: 13px;
+    padding-block: 22px;
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { photo, url } from '../lib/site';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  index: number;
+  eager?: boolean;
+}
+const { project, index, eager = false } = Astro.props;
+const { title, type, location, year, summary, cover } = project.data;
+const img = photo(cover);
+const href = url(`/works/${project.id}/`);
+const flip = index % 2 === 1;
+---
+
+<article class:list={['spread', { flip }]}>
+  <a class="photo photo-frame" href={href} tabindex="-1" aria-hidden="true">
+    {img && (
+      <Image
+        src={img}
+        alt=""
+        widths={[480, 800, 1200, 1600]}
+        sizes="(max-width: 900px) 100vw, 60vw"
+        loading={eager ? 'eager' : 'lazy'}
+      />
+    )}
+  </a>
+  <div class="text">
+    <span class="num serif">No. {String(index + 1).padStart(2, '0')}</span>
+    <h3 class="serif"><a href={href}>{title}</a></h3>
+    <span class="label">{[type, location, year].filter(Boolean).join(' · ')}</span>
+    {summary && <p>{summary}</p>}
+    <a class="link-arrow" href={href} aria-label={`View project: ${title}`}>View project →</a>
+  </div>
+</article>
+
+<style>
+  .spread {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(24px, 5vw, 56px);
+  }
+  .spread.flip { flex-direction: row-reverse; }
+  .photo {
+    flex: 2 1 520px;
+    aspect-ratio: 3 / 2;
+    display: block;
+  }
+  .photo img { transition: transform 0.8s ease; }
+  .photo:hover img { transform: scale(1.03); }
+  @media (prefers-reduced-motion: reduce) { .photo img { transition: none; } .photo:hover img { transform: none; } }
+  .text {
+    flex: 1 1 300px;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .num { font-size: 22px; font-style: italic; color: var(--ink-muted); }
+  h3 { margin: 0; font-size: clamp(34px, 4vw, 44px); line-height: 1.05; }
+  h3 a { color: var(--ink); text-decoration: none; }
+  h3 a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  p { margin: 0; color: var(--ink-soft); line-height: 1.65; }
+  .link-arrow { align-self: flex-start; }
+
+  @media (max-width: 900px) {
+    .spread, .spread.flip { flex-direction: column; align-items: stretch; }
+    .photo { flex: none; width: 100%; }
+    .text { max-width: none; }
+  }
+</style>
