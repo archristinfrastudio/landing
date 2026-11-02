@@ -1,6 +1,6 @@
 ---
-title: "[Courtyard House]"
-location: "[Location]"
+title: State Bank COlony
+location: Tuticorin
 year: 2025
 type: Residential
 summary: "[Two lines on the brief, the site and the idea behind the design.]"
@@ -15,7 +15,6 @@ featured: true
 published: true
 order: 1
 ---
-
 [A longer description of the project: the client, the site, the main design moves, materials, and what it is like to be in the space. A few short paragraphs is plenty.]
 
 [Second paragraph — details such as area, team, collaborators or photographer credit.]
