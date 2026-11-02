@@ -1,5 +1,5 @@
 ---
-title: State Bank COlony
+title: State Bank Colony
 location: Tuticorin
 year: 2025
 type: Residential
