@@ -1,16 +1,15 @@
 {
-  "studioName": "[Studio Name]",
+  "studioName": "archristinfra",
   "headline": "Spaces shaped by *light* and place.",
-  "intro": "[A short paragraph introducing the architect — approach, materials, and the kind of clients they work with.]",
-  "quote": "[A sentence in the architect's own words about what makes a good building.]",
+  "intro": "Archrist Infra is an architecture and construction studio serving in and around Tuticorin . We design homes and workspaces that respond to their climate, their site and the people who use them, and we see each project through from first drawings to handover.",
+  "quote": "“Good architecture begins with listening, to the site, to the climate, and to the people who will live there.”",
   "studioText": "[A few paragraphs about the practice: training, how the studio works with clients, and the places it builds in.]",
-  "city": "[City]",
-  "established": "[Year]",
-  "phone": "+91 00000 00000",
-  "whatsapp": "910000000000",
-  "email": "hello@example.com",
-  "address": "[Studio address line 1]\n[City, PIN]",
+  "city": "Tuticorin",
+  "established": "2026",
+  "phone": "+91 9600234070",
+  "whatsapp": "919600234070",
+  "email": "archristinfra.studio@gmail.com",
+  "address": "State Bank Colony\nTuticorin - 628002",
   "mapUrl": "https://maps.google.com",
-  "instagram": "https://instagram.com",
-  "linkedin": ""
+  "instagram": "https://www.instagram.com/_archrist_infra_/"
 }
