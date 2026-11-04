@@ -57,3 +57,8 @@ export function telHref(phone: string): string {
 export function whatsappHref(number: string): string {
   return `https://wa.me/${number.replace(/\D/g, '')}`;
 }
+
+/** Remove quotation marks typed around a quote — the page adds its own. */
+export function cleanQuote(text: string): string {
+  return text.trim().replace(/^["'“‘«]+/, '').replace(/["'”’»]+$/, '').trim();
+}

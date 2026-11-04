@@ -28,6 +28,7 @@ const settings = defineCollection({
   }),
   schema: z.object({
     studioName: z.string(),
+    logo: z.string().default(''),
     headline: z.string(),
     intro: z.string(),
     quote: z.string().default(''),

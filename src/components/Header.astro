@@ -3,19 +3,29 @@ import { url } from '../lib/site';
 
 interface Props {
   studioName: string;
+  logo?: string;
   current: 'home' | 'works' | 'studio';
 }
-const { studioName, current } = Astro.props;
+const { studioName, logo, current } = Astro.props;
+// Logos uploaded in the admin panel are stored as "/brand/<file>" in public/brand.
+const logoSrc = logo ? url(logo) : '';
 ---
 
 <header class="site-header">
-  <div class="wrap bar">
+  <div class:list={['wrap', 'bar', { 'has-logo': logoSrc }]}>
     <nav class="left" aria-label="Main">
       <a href={url('/works/')} aria-current={current === 'works' ? 'page' : undefined}>Works</a>
       <a href={url('/studio/')} aria-current={current === 'studio' ? 'page' : undefined}>Studio</a>
+      <a href="#contact">Contact</a>
     </nav>
     <a class="name serif" href={url('/')}>{studioName}</a>
-    <a class="right" href="#contact">Contact</a>
+    <div class="right">
+      {logoSrc && (
+        <a class="logo" href={url('/')} aria-label={`${studioName} home`}>
+          <img src={logoSrc} alt={`${studioName} logo`} height="44" />
+        </a>
+      )}
+    </div>
   </div>
 </header>
 
@@ -26,10 +36,10 @@ const { studioName, current } = Astro.props;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 16px;
-    padding-block: 20px;
+    padding-block: 18px;
   }
-  .left { display: flex; gap: 28px; }
-  .left a, .right {
+  .left { display: flex; flex-wrap: wrap; column-gap: 28px; }
+  .left a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -40,7 +50,6 @@ const { studioName, current } = Astro.props;
     color: var(--ink);
   }
   .left a[aria-current='page'] { text-decoration: underline; text-underline-offset: 6px; }
-  .right { justify-self: end; }
   .name {
     font-size: clamp(24px, 3vw, 30px);
     font-weight: 600;
@@ -49,16 +58,25 @@ const { studioName, current } = Astro.props;
     text-align: center;
     line-height: 1.1;
   }
+  .right { justify-self: end; display: flex; align-items: center; }
+  .logo { display: inline-flex; align-items: center; min-height: 44px; }
+  .logo img {
+    height: 44px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+  }
 
-  @media (max-width: 640px) {
+  @media (max-width: 760px) {
     .bar {
       grid-template-columns: 1fr auto;
-      grid-template-areas: 'name name' 'left right';
-      row-gap: 4px;
-      padding-block: 14px 4px;
+      grid-template-areas: 'name right' 'left left';
+      row-gap: 2px;
+      padding-block: 12px 2px;
     }
     .name { grid-area: name; text-align: left; }
-    .left { grid-area: left; gap: 20px; }
     .right { grid-area: right; }
+    .left { grid-area: left; column-gap: 20px; }
+    .logo img { height: 36px; max-width: 120px; }
   }
 </style>

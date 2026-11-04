@@ -44,7 +44,7 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <Header studioName={settings.studioName} current={current} />
+    <Header studioName={settings.studioName} logo={settings.logo} current={current} />
     <main id="main">
       <slot />
     </main>

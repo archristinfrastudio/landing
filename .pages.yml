@@ -8,6 +8,12 @@ media:
     output: /projects
     rename: safe
     extensions: [jpg, jpeg, png, webp]
+  - name: brand
+    label: Logo
+    input: public/brand
+    output: /brand
+    rename: safe
+    extensions: [svg, png, webp]
 
 content:
   - name: projects
@@ -79,6 +85,11 @@ content:
         label: Studio name
         type: string
         required: true
+      - name: logo
+        label: Logo (top right — SVG or transparent PNG works best)
+        type: image
+        options:
+          media: brand
       - name: headline
         label: Homepage headline (put *stars* around a word to italicise it)
         type: string

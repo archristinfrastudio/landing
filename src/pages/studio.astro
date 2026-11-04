@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import { getProjects, getSettings, photo } from '../lib/site';
+import { cleanQuote, getProjects, getSettings, photo } from '../lib/site';
 
 const settings = await getSettings();
 const projects = await getProjects();
@@ -44,7 +44,7 @@ const facts = [
 
   {settings.quote && (
     <section class="wrap quote">
-      <blockquote class="serif">“{settings.quote}”</blockquote>
+      <blockquote class="serif">“{cleanQuote(settings.quote)}”</blockquote>
     </section>
   )}
 </Base>

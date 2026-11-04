@@ -2,7 +2,7 @@
 import { Image, getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import ProjectSpread from '../components/ProjectSpread.astro';
-import { emphasis, getProjects, getSettings, photo, url } from '../lib/site';
+import { cleanQuote, emphasis, getProjects, getSettings, photo, url } from '../lib/site';
 
 const settings = await getSettings();
 const projects = await getProjects();
@@ -55,7 +55,7 @@ const heroLabel = ['Architect', settings.city, settings.established && `Est. ${s
 
   {settings.quote && (
     <section class="wrap quote">
-      <blockquote class="serif">“{settings.quote}”</blockquote>
+      <blockquote class="serif">“{cleanQuote(settings.quote)}”</blockquote>
       <a class="link-arrow" href={url('/studio/')}>About the studio →</a>
     </section>
   )}
